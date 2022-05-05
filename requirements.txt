@@ -1,0 +1,7 @@
+python-json-logger
+pdfminer.six 
+genalog
+PyMuPDF
+pdf2image
+markupsafe==2.0.1
+pyyaml
