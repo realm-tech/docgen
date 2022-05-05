@@ -1,0 +1,9 @@
+output
+__pycache__
+texts/crawler.txt
+genalog_repo
+pyvenv
+wasyprint-*
+logs
+test
+pyvenv*

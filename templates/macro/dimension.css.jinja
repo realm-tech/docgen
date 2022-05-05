@@ -1,0 +1,24 @@
+{# Copyright (c) Microsoft Corporation. All rights reserved. #}
+
+{% macro set_page_dimension(width, height, margin) -%}
+    @page {
+        size: {{ width }}cm {{ height }}cm;
+        margin: {{ margin }}cm;
+    }
+{% endmacro %}
+
+{% macro a3_paper(margin=2) %}
+    {{ set_page_dimension(30, 42, margin) }}
+{% endmacro %}
+
+{% macro a4_paper(margin=2) %}
+    {{ set_page_dimension(21, 30, margin) }}
+{% endmacro %}
+
+{% macro a5_paper(margin=1.5) %}
+    {{ set_page_dimension(15, 21, margin) }}
+{% endmacro %}
+
+{% macro letter_paper(margin=2) %}
+    {{ set_page_dimension(21, 28, margin) }}
+{% endmacro %}
