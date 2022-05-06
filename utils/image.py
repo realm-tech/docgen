@@ -33,7 +33,7 @@ def poses2bboxes(poses: List[Any], page_height: float, zoom: float) -> np.ndarra
     wbboxes = np.zeros((len(poses), 4, 2), dtype=np.float32)
 
     for idx, pos in enumerate(poses):
-        print(idx)
+        #print(idx)
         w = pos[2] - pos[0]
         h = pos[3] - pos[1]
         # Clock-wise order from upper-left

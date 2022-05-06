@@ -55,8 +55,8 @@ text_base_path = "./texts"
 pdf_output_path = "./output"
 absolute_path = "file://" + os.path.dirname(os.path.abspath(__file__))
 logger.info("Absolute path: {}".format(absolute_path))
-img_logo_base_path = "./images/"
-img_sig_base_path = "./images/"
+img_logo_base_path = "./img_logos/"
+img_sig_base_path = "./img_sigs/"
 font_base_path = "./fonts/"
 
 all_fonts = glob(os.path.join(font_base_path, '/*.ttf'))
@@ -73,11 +73,9 @@ letter_addressee_name = random_select(letter_addressee_name, config.num_addresse
 letter_addressee_title = [i for i in text_dataset if len(i)<40]
 letter_addressee_title = random_select(letter_addressee_title, config.num_addressee_title)
 
-# define genalog generator.
-with open(text_path, 'r') as f:
-    text = f.read()
+paragraphs = [i for i in text_dataset if len(i.split()) > 30 and len(i.split()) < 50 ]
+logger.info("Paragraph number is {}".format(len(paragraphs)))
 
-paragraphs = text.split('\n\n')
 content_types = [ContentType.PARAGRAPH] * len(paragraphs)
 content = CompositeContent(paragraphs, content_types)
 default_generator = DocumentGenerator(template_path="./templates")
@@ -85,44 +83,46 @@ doc_gen = default_generator.create_generator(content, ['letter.html.jinja'])
 
 # define style parameters.
 font_paths = random_select(glob(os.path.join(font_base_path, '*.ttf')), config.num_fonts)
-font_family = [font_path.split('.')[0] for font_path in font_paths ] 
-img_logos = random_select(glob(os.path.join(img_logo_base_path, '*.png')), config.num_logos)
-img_signatures = random_select(glob(os.path.join(img_sig_base_path, '*.png')), config.num_sigs) 
+font_family = [ font_path.split('.')[0] for font_path in font_paths ] 
+img_logos = [ os.path.join(absolute_path, logo) for logo in random_select(glob(os.path.join(img_logo_base_path, '*.png')), config.num_logos) ] 
+img_signatures = [ os.path.join(absolute_path, sig) for sig in  random_select(glob(os.path.join(img_sig_base_path, '*emza*.png')), config.num_sigs) ]
+print("###"*10 + "\nSample logo path", img_logos[0]) 
+print("###"*10 + "\nSample sig path", img_signatures[0]) 
+
 page_size = PageSize.A5
 
 # Grid Warper
 gridWarper = GridWarper(random_area_ratio=0.13, logger=logger)
 
-
 new_style_combinations = {
     "hyphenate": [False],
     "font_size": ["11px"],
-    "font_family": font_family,
+    "font_family": [font_family],
     "text_align": ["right"],
     "language": ["fa"],
 
     "absolute_path": [absolute_path],
-    "font_path" : font_paths,
-    "img_logo" : img_logos,
-    "img_signature" : img_signatures,
+    "font_path" : [font_paths],
+    "img_logo" : [img_logos],
+    "img_signature" : [img_signatures],
     "page_size" : [2], #[0, 1, 2, 3] A5
 
     # address properties
     "letter_addressee_name": letter_addressee_name,
     "letter_addressee_title": letter_addressee_title,
-    "add_trans_rot": [ str(i)+"deg" for i in np.arange(-2, 2.5, 0.5) ],
-    "add_trans_skew": [ str(i)+"deg" for i in np.arange(-1, 1.5, 0.5) ],
+    #"add_trans_rot": [ str(i)+"deg" for i in np.arange(-2, 2.5, 0.5) ],
+    #"add_trans_skew": [ str(i)+"deg" for i in np.arange(-1, 1.5, 0.5) ],
 
     # section properties
-    "sec_trans_skewy": [ str(i)+"deg" for i in np.arange(-1, 1.5, 0.5) ],
+    #"sec_trans_skewy": [ str(i)+"deg" for i in np.arange(-1, 1.5, 0.5) ],
     "sec_text_align": [ "center", "left", "right", "justify" ]
 }
 
 # define degeradation parameters.
 DEGRADATIONS = [
-    ("morphology", {"operation": "open", "kernel_shape":(9,9), "kernel_type":"plus"}),
-    ("morphology", {"operation": "close", "kernel_shape":(9,1), "kernel_type":"ones"}),
-    ("salt", {"amount": 0.7}),
+    ("morphology", {"operation": "open", "kernel_shape":(3,3), "kernel_type":"plus"}),
+    ("morphology", {"operation": "close", "kernel_shape":(5,1), "kernel_type":"ones"}),
+    ("salt", {"amount": 0.01}),
     ("overlay", {
         "src": ImageState.ORIGINAL_STATE,
         "background": ImageState.CURRENT_STATE,
@@ -130,13 +130,13 @@ DEGRADATIONS = [
     ("bleed_through", {
         "src": ImageState.CURRENT_STATE,
         "background": ImageState.ORIGINAL_STATE,
-        "alpha": 0.8,
-        "offset_x": -3,
-        "offset_y": -6,
+        "alpha": 0.95,
+        "offset_x": -1,
+        "offset_y": -3,
     }),
     ("pepper", {"amount": 0.005}),
-    ("blur", {"radius": 5}),
-    ("salt", {"amount": 0.15}),
+    ("blur", {"radius": 1}),
+    ("salt", {"amount": 0.005}),
 ]
 
 # applying styles and degradation.
@@ -149,8 +149,8 @@ for idx, doc in enumerate(doc_gen):
     base_output_path = os.path.join(pdf_output_path,str(idx))
     os.makedirs(base_output_path, exist_ok=True)
 
-    file_name = os.path.join(base_output_path, doc.styles["font_family"] + "_" + doc.styles["font_size"] + "_{}".format(idx)) 
-    deg_file_name = os.path.join(base_output_path,"DEG_" + doc.styles["font_family"] + "_" + doc.styles["font_size"] + "_{}".format(idx))
+    file_name = os.path.join(base_output_path, "{}".format(str(idx))) 
+    deg_file_name = os.path.join(base_output_path, "{}".format(str(idx)))
 
     pdf_name = file_name + ".pdf"
     # Store Pdf with convert_from_path function.
@@ -159,7 +159,7 @@ for idx, doc in enumerate(doc_gen):
     # doc.render_png(target=png_name, resolution=300)
     
     # getting bounding boxes.
-    words, positions, cropbox = GetBoundingBoxes(pdf_name, True)
+    words, positions, cropbox = GetBoundingBoxes(pdf_name, print_output=False)
     page_height = cropbox[3]
 
     wbboxes = poses2bboxes(positions, page_height, config.zoom)    
@@ -173,11 +173,14 @@ for idx, doc in enumerate(doc_gen):
         images[i].save(png_name, 'PNG')
         deg_image = degrader.apply_effects(cv.imread(png_name, cv.IMREAD_GRAYSCALE))
 
+        deg_image = deg_image.reshape((*deg_image.shape,1)) 
+        deg_image = np.concatenate((deg_image, deg_image, deg_image), axis=2)
         # Random Warping
         if config.warp.enabled: 
             deg_image, wbboxes = gridWarper(deg_image, wbboxes)
+        
 
-        deg_image = drawbboxes(deg_image, wbboxes)
+        deg_image = drawbboxes(deg_image, wbboxes, color=(207, 227, 226))
         cv.imshow(winname, deg_image)
         cv.waitKey(0)        
 

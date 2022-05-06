@@ -38,7 +38,12 @@
             <img src={{img_logo}} class="logo">
         </div>
         <div class="left-head">
-        
+            </p>
+            تاریخ:  {{ range(1390,1401) | random }}/{{ range(1,13) | random }}/{{ range(1,30) | random }}
+            </p></p>
+            شماره:  {{ range(1000000,9999999) | random }}
+            </p></p>
+            موضوع: ماده  {{ range(1,121) | random }}
 
         </div>
     </div>
@@ -50,15 +55,15 @@
 
    {% if content and content.content_type.__str__() == "ContentType.COMPOSITE"%}
         <div class="sections" >
-            {% for c in content %}
-                {% if c.content_type.__str__() == "ContentType.TITLE"%}
-                    <p> {{ c }} </p>
-                {% elif c.content_type.__str__() == "ContentType.PARAGRAPH" %}
-                    <p> {{ c }} </p>
-                {% else %}
-                    <p> Unsupported Content Type: {{c.content_type.__str__()}} </p>
-                {% endif %}
-            {% endfor %}
+            {% set c = content._content | random() %}
+            {% if c.content_type.__str__() == "ContentType.TITLE"%}
+                <p> {{ c }} </p>
+            {% elif c.content_type.__str__() == "ContentType.PARAGRAPH" %}
+                <p class="IntPrand"> {{ c }} </p>
+                <p> {{ c }} </p>
+            {% else %}
+                <p> Unsupported Content Type: {{c.content_type.__str__()}} </p>
+            {% endif %}
         </div>
         <div class="signature">
             <img src={{img_signature}} class="logo">
