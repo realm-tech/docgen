@@ -1,4 +1,4 @@
-num_fonts: 1 # Number of fonts randomly picked from font file
+num_fonts: 100 # Number of fonts randomly picked from font file
 num_logos: 1 # * logs * 
 num_sigs: 1  # * sigs * 
 num_addressee_name: 1

@@ -2,17 +2,17 @@
 
 @font-face {
     font-family: FirstRanodmFont;
-    src: url({{ font_path | random() }});
+    src: url({{ font_path | random }});
 }
 
 @font-face {
     font-family: SecondRanodmFont;
-    src: url({{ font_path | random() }});
+    src: url({{ font_path | random }});
 }
 
 @font-face {
     font-family: ThirdRanodmFont;
-    src: url({{ font_path | random() }});
+    src: url({{ font_path | random }});
 }
 
 .section-title {
@@ -32,6 +32,7 @@
 }
 
 .right-head {
+    font-family: FirstRanodmFont;
     float: right;
     margin: 0;
     background-color: ;
@@ -88,9 +89,9 @@
 }
 
 .IntPrand {
-    font-family: ThirdRanodmFont
-    font-size: {{ [ '9px', '15px', '17px' ] | random() }};
-    font-weight: {{ [ 'Bold', 'Italic' ] | random() }};
+    font-family: ThirdRanodmFont;
+    font-size: {{ [ '19px', '15px', '17px' ] | random }};
+    font-weight: {{ [ 'Bold', 'Italic' ] | random }};
     {# transform: rotate( {{ ['-3deg', '3deg', '0deg' ] | random() }} ); #}
 }
 
