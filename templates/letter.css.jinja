@@ -81,6 +81,7 @@
     transform: rotate( {{ add_trans_rot }} ); 
     transform: skewY( {{ add_trans_skew }} );
     transform: scale( {{ add_trans_scale }} );
+    color: 
 }
 
 .logo {
@@ -88,10 +89,19 @@
   height: 80%;
 }
 
+.randomsec1{
+    display: flex; 
+    flex-direction: {{ [ 'row', 'row-reverse', 'column', 'column-reverse'] | random }}; 
+}
+
 .IntPrand {
+    margin: 1px 1px 1px 1px ; 
     font-family: ThirdRanodmFont;
     font-size: {{ [ '19px', '15px', '17px' ] | random }};
     font-weight: {{ [ 'Bold', 'Italic' ] | random }};
+    color: rgb({{ (range(200, 250)| random, range(200, 250)| random, range(200, 250)| random) }})
+    align-items: center
+
     {# transform: rotate( {{ ['-3deg', '3deg', '0deg' ] | random() }} ); #}
 }
 

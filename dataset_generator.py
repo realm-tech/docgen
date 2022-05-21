@@ -102,8 +102,8 @@ new_style_combinations = {
 
     "absolute_path": [absolute_path],
     "font_path" : [font_paths],
-    "img_logo" : [img_logos],
-    "img_signature" : [img_signatures],
+    "img_logo" : img_logos,
+    "img_signature" : img_signatures,
     "page_size" : [2], #[0, 1, 2, 3] A5
 
     # address properties

@@ -25,6 +25,8 @@
 
 {% block body %}
     <div class="letter-head">
+
+        {% if ( range(1,3) | random == 1) %}
         <div class="right-head">
             </p>
             تاریخ:  {{ range(1390,1401) | random }}/{{ range(1,13) | random }}/{{ range(1,30) | random }}
@@ -33,9 +35,16 @@
             </p></p>
             موضوع: ماده  {{ range(1,121) | random }}
         </div>
+        {% endif %}
+
+
+        {% if ( range(1,3) | random == 1) %}
         <div class="center-head">
-            <img src={{img_logo}} class="logo">
+            <img src= {{ img_logo }} class="logo">
         </div>
+        {% endif %}
+
+        {% if ( range(1,3) | random == 1) %}
         <div class="left-head">
             </p>
             تاریخ:  {{ range(1390,1401) | random }}/{{ range(1,13) | random }}/{{ range(1,30) | random }}
@@ -43,8 +52,9 @@
             شماره:  {{ range(1000000,9999999) | random }}
             </p></p>
             موضوع: ماده  {{ range(1,121) | random }}
-
         </div>
+        {% endif %}
+
     </div>
     
     <div class="addressee">
@@ -59,6 +69,13 @@
                 <p> {{ c }} </p>
             {% elif c.content_type.__str__() == "ContentType.PARAGRAPH" %}
                 <p class="IntPrand"> {{ c }} </p>
+                <div class="randomsec1">
+                    {% set num_elem= [ 1 , 2 , 3, 4] | random %}
+                    {% for elem in range(num_elem)  %}
+                        {% set short_content = content._content | random %}
+                        <p> {{ short_content }} </p> 
+                    {% endfor %}
+                </div> 
                 <p> {{ c }} </p>
             {% else %}
                 <p> Unsupported Content Type: {{c.content_type.__str__()}} </p>
