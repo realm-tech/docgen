@@ -7,7 +7,8 @@ import sys
 
 import logging
 import logging.config
-import os
+import os, shutil
+from typing import List
 
 def get_env_key_val(name: str, default: bool):
     return os.getenv(name) if os.getenv(name) else default
@@ -37,6 +38,31 @@ APP_VERSION = "0.1"
 
 if not os.path.exists(base_directory):
     os.makedirs(base_directory)
+
+def detect_file(path: str):
+    if len(path.split('.')) > 1 : 
+        return True
+    return False
+
+def detect_folder(path: str):
+    if len(path.split('.')) == 1 : 
+        return True
+    return False
+
+def clear_up(paths: List[str], logger=None):
+    if not logger: 
+        logger = get_logger("Cleanup")
+
+    for path in paths: 
+        logger.info("Checking path: " + path)
+        if os.path.exists(path):
+            if detect_folder(path) :
+                logger.warning("Removing " + path) 
+                shutil.rmtree(path)
+            elif detect_file(path) : 
+                logger.warning("Removing " + path)
+                os.remove(path)
+
 
 
 def get_logger(name: str, add_stdout=True, add_file=True, default_log_level=logging.DEBUG):

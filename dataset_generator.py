@@ -1,7 +1,7 @@
 # general libraries.
 import numpy as np
 import cv2 as cv
-import fitz, enum, os, yaml
+import fitz, enum, os, yaml, shutil
 
 from glob import glob
 from typing import List
@@ -15,7 +15,7 @@ from pdf2image import convert_from_path
 # custom made library to extract bounding boxes from PDF.
 from get_bounding_boxes import get_bounding_boxes as GetBoundingBoxes
 
-from utils.file_util import get_logger, YamlDict2Mem
+from utils.file_util import get_logger, YamlDict2Mem, clear_up
 from utils.image import poses2bboxes, drawbboxes
 
 from Warping.warper import GridWarper
@@ -23,7 +23,10 @@ from Warping.warper import GridWarper
 with open('./config.yaml', 'r') as file:
     config = yaml.load(file)
 config = YamlDict2Mem(**config)
-print(config)
+
+os.environ["DUMP_BOUNDING_BOX"] = "1"
+# Clearing up auxiliary files
+clear_up(paths=[config.dump_path])
 
 def random_select(inp: List, count: int, logger=None):
     msg = "Input list len is: {}".format(len(inp))
@@ -99,19 +102,16 @@ gridWarper = GridWarper(random_area_ratio=0.13, logger=logger)
 new_style_combinations = {
     "text_align": ["right"],
     "language": ["fa"],
-
     "absolute_path": [absolute_path],
     "font_path" : [font_paths],
     "img_logo" : img_logos,
     "img_signature" : img_signatures,
     "page_size" : [2], #[0, 1, 2, 3] A5
-
     # address properties
     "letter_addressee_name": letter_addressee_name,
     "letter_addressee_title": letter_addressee_title,
     #"add_trans_rot": [ str(i)+"deg" for i in np.arange(-2, 2.5, 0.5) ],
     #"add_trans_skew": [ str(i)+"deg" for i in np.arange(-1, 1.5, 0.5) ],
-
     # section properties
     #"sec_trans_skewy": [ str(i)+"deg" for i in np.arange(-1, 1.5, 0.5) ],
     "sec_text_align": [ "center", "left", "right", "justify" ]
@@ -140,8 +140,6 @@ DEGRADATIONS = [
 
 # applying styles and degradation.
 
-
-
 iter = 0
 while True: 
     logger.info("iter no: {}".format(iter+1))
@@ -164,17 +162,24 @@ while True:
         pdf_name = file_name + ".pdf"
         # Store Pdf with convert_from_path function.
         
-        doc.render_pdf(target=pdf_name, zoom=config.zoom)
+        bbox = doc.render_pdf(target=pdf_name, zoom=config.zoom)
         # doc.render_png(target=png_name, resolution=300)
         html_output = doc.render_html()
+
+        print(bbox)
+        with open(config.dump_path, 'r') as file:
+            file_bboxes = file.readlines()
+        
         with open(os.path.join(base_output_path, 'string.html'), 'w') as file :
             file.writelines(html_output)
+        print("Bboxes len: ", len(bbox))
+        print("Bboxes from file ", len(file_bboxes)) 
         
-        # getting bounding boxes.
-        words, positions, cropbox = GetBoundingBoxes(pdf_name, print_output=False)
-        page_height = cropbox[3]
-
-        wbboxes = poses2bboxes(positions, page_height, config.zoom)    
+        ### getting bounding boxes. ####
+        # words, positions, cropbox = GetBoundingBoxes(pdf_name, print_output=False)
+        #page_height = cropbox[3]
+        #wbboxes = poses2bboxes(positions, page_height, config.zoom)    
+        #######################################
 
         images = convert_from_path(pdf_name, dpi=config.dpi)
         for i in range(len(images)):
@@ -182,21 +187,30 @@ while True:
             deg_png_name = deg_file_name + "_" + str(i) + ".png"
 
             # Save pages as images in the pdf.
+            print("####"*10)
+            print("png_name", png_name)
+            print(type(images[i]))
             images[i].save(png_name, 'PNG')
-            deg_image = degrader.apply_effects(cv.imread(png_name, cv.IMREAD_GRAYSCALE))
+
+            deg_png_name = deg_png_name + "untouched.png"
+            images[i].save(deg_png_name, 'PNG')
+            deg_image = degrader.apply_effects(cv.imread(deg_png_name, cv.IMREAD_GRAYSCALE))
 
             deg_image = deg_image.reshape((*deg_image.shape,1)) 
             deg_image = np.concatenate((deg_image, deg_image, deg_image), axis=2)
             # Random Warping
-            if config.warp.enabled: 
-                deg_image, wbboxes = gridWarper(deg_image, wbboxes)
+            #if config.warp.enabled: 
+            #    deg_image, wbboxes = gridWarper(deg_image, wbboxes)
             
-
-            deg_image = drawbboxes(deg_image, wbboxes, color=(207, 227, 226))
-            cv.imshow(winname, deg_image)
-            cv.waitKey(3000)        
+            #deg_image = drawbboxes(deg_image, wbboxes, color=(207, 227, 226))
+            #cv.imshow(winname, deg_image)
+            #cv.waitKey(3000)        
 
             cv.imwrite(deg_png_name, deg_image)
+
+            break
+        break     
+    break
 
     if iter == 3: 
         break

@@ -7,6 +7,13 @@ we plan to completley remove `genalog` which causing some serious problems
 python3 -m pip install -r requirements.txt
 ```
 
+## Dependencies
+
+Install modified version of `WeasyPrint` 
+```bash
+python3 -m pip install flit && flit install --symlink --python /usr/bin/python3
+```
+
 ## How to use:
 "dataset_generator.py" is the main file. 
 
@@ -17,3 +24,10 @@ python3 -m pip install -r requirements.txt
 "images/" is the images folder to use in the template.
 "fonts/" is the fonts folder. poupulate some fonts
 run "dataset_generator.py".
+
+
+# Sample visualization
+```bash
+./visualize.py --img  /home/parano/Desktop/docgen/output/1-0/0_0.pnguntouched.png --bbox /home/parano/docgen/test
+```
+

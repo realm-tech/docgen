@@ -1,0 +1,9 @@
+*.pyc
+.cache
+/.coverage
+/build
+/dist
+/docs/_build
+/pytest_cache
+/tests/draw/results
+/venv

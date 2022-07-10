@@ -1,0 +1,3 @@
+/home/parano/Desktop/docgen/low-level-drawing/CMakeFiles/rebuild_cache.dir
+/home/parano/Desktop/docgen/low-level-drawing/CMakeFiles/edit_cache.dir
+/home/parano/Desktop/docgen/low-level-drawing/CMakeFiles/draw-low-level.dir

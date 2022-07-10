@@ -9,3 +9,7 @@ test
 pyvenv*
 sample_output
 fonts
+.vscode
+**/a.out 
+**/*.out
+**/*.png

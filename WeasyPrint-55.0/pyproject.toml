@@ -1,0 +1,76 @@
+[build-system]
+requires = ['flit_core >=3.2,<4']
+build-backend = 'flit_core.buildapi'
+
+[project]
+name = 'weasyprint'
+description = 'The Awesome Document Factory'
+keywords = ['html', 'css', 'pdf', 'converter']
+authors = [{name = 'Simon Sapin', email = 'simon.sapin@exyr.org'}]
+maintainers = [{name = 'CourtBouillon', email = 'contact@courtbouillon.org'}]
+requires-python = '>=3.7'
+readme = {file = 'README.rst', content-type = 'text/x-rst'}
+license = {file = 'LICENSE'}
+dependencies = [
+  'pydyf >=0.0.3',
+  'cffi >=0.6',
+  'html5lib >=1.1',
+  'tinycss2 >=1.0.0',
+  'cssselect2 >=0.1',
+  'Pyphen >=0.9.1',
+  'Pillow >=4.0.0',
+  'fonttools[woff] >=4.0.0',
+]
+classifiers = [
+  'Development Status :: 5 - Production/Stable',
+  'Intended Audience :: Developers',
+  'License :: OSI Approved :: BSD License',
+  'Operating System :: OS Independent',
+  'Programming Language :: Python',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3 :: Only',
+  'Programming Language :: Python :: 3.7',
+  'Programming Language :: Python :: 3.8',
+  'Programming Language :: Python :: 3.9',
+  'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: Implementation :: CPython',
+  'Programming Language :: Python :: Implementation :: PyPy',
+  'Topic :: Internet :: WWW/HTTP',
+  'Topic :: Text Processing :: Markup :: HTML',
+  'Topic :: Multimedia :: Graphics :: Graphics Conversion',
+  'Topic :: Printing',
+]
+dynamic = ['version']
+
+[project.urls]
+Homepage = 'https://www.courtbouillon.org/weasyprint'
+Documentation = 'https://doc.courtbouillon.org/weasyprint/'
+Code = 'https://github.com/Kozea/WeasyPrint'
+Issues = 'https://github.com/Kozea/WeasyPrint/issues'
+Changelog = 'https://github.com/Kozea/WeasyPrint/releases'
+Donation = 'https://opencollective.com/courtbouillon'
+
+[project.optional-dependencies]
+doc = ['sphinx', 'sphinx_rtd_theme']
+test = ['pytest', 'pytest-cov', 'pytest-flake8', 'pytest-isort', 'coverage[toml]']
+
+[project.scripts]
+weasyprint = 'weasyprint.__main__:main'
+
+[tool.flit.sdist]
+exclude = ['.*', 'tests/results']
+
+[tool.pytest.ini_options]
+addopts = '--isort --flake8 --cov --no-cov-on-fail'
+
+[tool.coverage.run]
+branch = true
+include = ['tests/*', 'weasyprint/*']
+
+[tool.coverage.report]
+exclude_lines = ['pragma: no cover', 'def __repr__', 'raise NotImplementedError']
+omit = ['.*']
+
+[tool.isort]
+default_section = 'FIRSTPARTY'
+multi_line_output = 4

@@ -5,6 +5,8 @@ num_addressee_name: 1
 num_addressee_title: 1
 zoom: 1
 dpi: 300
+dump_path: /home/parano/docgen/test.txt
+force_delete: true
 warp: 
   enabled: true
 
