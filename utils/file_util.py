@@ -39,6 +39,10 @@ APP_VERSION = "0.1"
 if not os.path.exists(base_directory):
     os.makedirs(base_directory)
 
+def create_folder(path: str):
+    if not os.path.exists(path):
+        os.makedirs(path, exist_ok=True)
+
 def detect_file(path: str):
     if len(path.split('.')) > 1 : 
         return True

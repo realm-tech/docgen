@@ -12,10 +12,8 @@ from genalog.generation.content import CompositeContent, ContentType
 from genalog.degradation.degrader import Degrader, ImageState
 # pdf2img library.
 from pdf2image import convert_from_path
-# custom made library to extract bounding boxes from PDF.
-from get_bounding_boxes import get_bounding_boxes as GetBoundingBoxes
 
-from utils.file_util import get_logger, YamlDict2Mem, clear_up
+from utils.file_util import get_logger, YamlDict2Mem, clear_up, create_folder
 from utils.image import poses2bboxes, drawbboxes
 
 from Warping.warper import GridWarper
@@ -26,7 +24,8 @@ config = YamlDict2Mem(**config)
 
 os.environ["DUMP_BOUNDING_BOX"] = "1"
 # Clearing up auxiliary files
-clear_up(paths=[config.dump_path])
+#clear_up(paths=[config.dump_path])
+create_folder(config.output_folder)
 
 def random_select(inp: List, count: int, logger=None):
     msg = "Input list len is: {}".format(len(inp))
@@ -138,12 +137,28 @@ DEGRADATIONS = [
     ("salt", {"amount": 0.005}),
 ]
 
+def clean_bboxes_output(obj, output): 
+    buff = list()
+    if isinstance(obj, list):
+        for elem in obj: 
+            if isinstance(elem, list):
+                output = clean_bboxes_output(elem, output)
+            elif obj: 
+                buff.append(obj)
+        output.append(buff)
+
+    return output
+
+            
+
+
 # applying styles and degradation.
 
 iter = 0
 while True: 
     logger.info("iter no: {}".format(iter+1))
     iter+=1 
+    worker_id = 0 
 
     default_generator = DocumentGenerator(template_path="./templates")
     doc_gen = default_generator.create_generator(content, ['letter.html.jinja'])
@@ -163,23 +178,31 @@ while True:
         # Store Pdf with convert_from_path function.
         
         bbox = doc.render_pdf(target=pdf_name, zoom=config.zoom)
+        cleaned_bboxes = clean_bboxes_output(bbox, list())
+
+
         # doc.render_png(target=png_name, resolution=300)
         html_output = doc.render_html()
+        output_file_name = str(worker_id) 
+        output_file_name = output_file_name + "{}.txt".format(iter) 
 
-        print(bbox)
-        with open(config.dump_path, 'r') as file:
-            file_bboxes = file.readlines()
+        with open(output_file_name, 'w') as file:
+            for entries in cleaned_bboxes:
+                line = ""
+                entries = entries[0]
+                for entry in entries:
+                    line += str(entry)
+                    line += "," 
+                line = line[:-1]
+                line += "\n"
+                file.write(line)    
+            
         
         with open(os.path.join(base_output_path, 'string.html'), 'w') as file :
             file.writelines(html_output)
+
         print("Bboxes len: ", len(bbox))
         print("Bboxes from file ", len(file_bboxes)) 
-        
-        ### getting bounding boxes. ####
-        # words, positions, cropbox = GetBoundingBoxes(pdf_name, print_output=False)
-        #page_height = cropbox[3]
-        #wbboxes = poses2bboxes(positions, page_height, config.zoom)    
-        #######################################
 
         images = convert_from_path(pdf_name, dpi=config.dpi)
         for i in range(len(images)):
@@ -214,23 +237,3 @@ while True:
 
     if iter == 3: 
         break
-
-# words, positions = GetBoundingBoxes(pdf_name, True)
-
-# # correction parameters for expand/collapse bounding boxes.
-# alpha = 1
-# beta = 1
-# for i in range(len(positions)):
-#     for j in range(len(positions[i])):
-#         positions[i][j][1] *= alpha
-#         positions[i][j][3] *= beta
-    
-# # generating bounding boxes.
-# doc = fitz.open(pdf_name)
-# for index, page in enumerate(doc):
-#     for position in positions[index]:
-#         # For every page, draw a rectangle on coordinates
-#         page.draw_rect([min(position[0], position[2]),  min(position[1], position[3]), max(position[0], position[2]), max(position[1], position[3])],  color = (0, 1, 0), width = 2)
-
-# # Save pdf
-# doc.save(file_name + "_bbox" + ".pdf")
