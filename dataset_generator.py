@@ -163,6 +163,24 @@ def clean_bboxes_output(obj, output):
     
     return output
 
+def bbox2pts(bboxes: list):
+    # Filtering zero area bboxes 
+    filetered_bboxes = list()
+    for bbox in bboxes:
+        if len(bbox) == 4: 
+            filetered_bboxes.append(bbox)
+
+    pts = np.zeros((len(filetered_bboxes), 4, 2), dtype=np.float32)
+
+    for idx, bbox in enumerate(filetered_bboxes): 
+        ul = (bbox[0], bbox[1])
+        ur = (bbox[0]+bbox[2], bbox[1])
+        lr = (bbox[0]+bbox[2], bbox[1]+bbox[3])
+        ll = (bbox[0], bbox[1]+bbox[3])
+        pts[i] = np.array([ul, ur, lr, ll])
+    
+    return pts
+
             
 # applying styles and degradation.
 iter = 0
@@ -213,6 +231,7 @@ while True:
 
         print("Bboxes len: ", len(cleaned_bboxes))
 
+
         images = convert_from_path(pdf_name, dpi=config.dpi)
         for i in range(len(images)):
             png_name = file_name + "_" + str(i) + ".png"
@@ -232,10 +251,11 @@ while True:
             deg_image = np.concatenate((deg_image, deg_image, deg_image), axis=2)
             
             # Random Warping
+            bbox_pts = bbox2pts(cleaned_bboxes)
             if config.warp.enabled: 
-                deg_image, cleaned_bboxes = gridWarper(deg_image, cleaned_bboxes)
+                deg_image, bboxes = gridWarper(deg_image, bbox_pts)
             
-            deg_image = drawbboxes(deg_image, cleaned_bboxes, color=(207, 227, 226))
+            deg_image = drawbboxes(deg_image, bbox_pts, color=(207, 227, 226))
             cv.imshow(winname, deg_image)
             #cv.waitKey(3000)        
 
