@@ -11,7 +11,10 @@ class GridWarper():
         self.same_shape = same_shape
         
         print("Speaking from GridWarper")
-        print(kwargs)
+        if kwargs.get('logger'): 
+            self.logger = kwargs.get('logger')
+        else: 
+            self.logger = lambda x: print(x)
 
         if not self.same_shape:
             try: 

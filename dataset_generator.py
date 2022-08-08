@@ -23,8 +23,6 @@ with open('./config.yaml', 'r') as file:
 config = YamlDict2Mem(**config)
 
 os.environ["DUMP_BOUNDING_BOX"] = "1"
-# Clearing up auxiliary files
-#clear_up(paths=[config.dump_path])
 create_folder(config.output_folder)
 
 def random_select(inp: List, count: int, logger=None):
@@ -143,17 +141,30 @@ def clean_bboxes_output(obj, output):
         for elem in obj: 
             if isinstance(elem, list):
                 output = clean_bboxes_output(elem, output)
-            elif obj: 
-                buff.append(obj)
-        output.append(buff)
+            elif isinstance(elem, tuple):
+                output = clean_bboxes_output(elem, output)
+            elif elem: 
+                buff.append(elem)
 
+    elif isinstance(obj, tuple):
+        for elem in obj: 
+            if isinstance(elem, list):
+                output = clean_bboxes_output(elem, output)
+            elif isinstance(elem, tuple):
+                output = clean_bboxes_output(elem, output)
+            elif elem:
+                buff.append(elem)
+
+    elif obj: 
+        buff.append(obj)
+
+    if len(buff) > 0: 
+        output.append(buff)
+    
     return output
 
             
-
-
 # applying styles and degradation.
-
 iter = 0
 while True: 
     logger.info("iter no: {}".format(iter+1))
@@ -183,13 +194,12 @@ while True:
 
         # doc.render_png(target=png_name, resolution=300)
         html_output = doc.render_html()
-        output_file_name = str(worker_id) 
+        output_file_name = os.path.join(config.output_folder, str(worker_id)) 
         output_file_name = output_file_name + "{}.txt".format(iter) 
 
         with open(output_file_name, 'w') as file:
             for entries in cleaned_bboxes:
                 line = ""
-                entries = entries[0]
                 for entry in entries:
                     line += str(entry)
                     line += "," 
@@ -201,8 +211,7 @@ while True:
         with open(os.path.join(base_output_path, 'string.html'), 'w') as file :
             file.writelines(html_output)
 
-        print("Bboxes len: ", len(bbox))
-        print("Bboxes from file ", len(file_bboxes)) 
+        print("Bboxes len: ", len(cleaned_bboxes))
 
         images = convert_from_path(pdf_name, dpi=config.dpi)
         for i in range(len(images)):
@@ -221,17 +230,19 @@ while True:
 
             deg_image = deg_image.reshape((*deg_image.shape,1)) 
             deg_image = np.concatenate((deg_image, deg_image, deg_image), axis=2)
-            # Random Warping
-            #if config.warp.enabled: 
-            #    deg_image, wbboxes = gridWarper(deg_image, wbboxes)
             
-            #deg_image = drawbboxes(deg_image, wbboxes, color=(207, 227, 226))
-            #cv.imshow(winname, deg_image)
+            # Random Warping
+            if config.warp.enabled: 
+                deg_image, cleaned_bboxes = gridWarper(deg_image, cleaned_bboxes)
+            
+            deg_image = drawbboxes(deg_image, cleaned_bboxes, color=(207, 227, 226))
+            cv.imshow(winname, deg_image)
             #cv.waitKey(3000)        
 
             cv.imwrite(deg_png_name, deg_image)
 
             break
+
         break     
     break
 
