@@ -163,7 +163,8 @@ def clean_bboxes_output(obj, output):
     
     return output
 
-def bbox2pts(bboxes: list):
+
+def bbox2pts(bboxes: list, scale: float):
     # Filtering zero area bboxes 
     filetered_bboxes = list()
     for bbox in bboxes:
@@ -172,12 +173,17 @@ def bbox2pts(bboxes: list):
 
     pts = np.zeros((len(filetered_bboxes), 4, 2), dtype=np.float32)
 
-    for idx, bbox in enumerate(filetered_bboxes): 
+    for idx2, bbox in enumerate(filetered_bboxes): 
+
+        for idx, elem in enumerate(bbox):
+            bbox[idx] = int(bbox[idx]*scale) 
+
         ul = (bbox[0], bbox[1])
         ur = (bbox[0]+bbox[2], bbox[1])
         lr = (bbox[0]+bbox[2], bbox[1]+bbox[3])
         ll = (bbox[0], bbox[1]+bbox[3])
-        pts[i] = np.array([ul, ur, lr, ll])
+        pts[idx2] = np.array([ul, ur, lr, ll])
+        #print(pts[i])
     
     return pts
 
@@ -194,14 +200,14 @@ while True:
     default_generator.set_styles_to_generate(new_style_combinations)
     degrader = Degrader(DEGRADATIONS)
     
-    for idx, doc in enumerate(doc_gen):
-        logger.info("Generating files for {}".format(idx))
+    for doc_idx, doc in enumerate(doc_gen):
+        logger.info("Generating files for worker-id:{}/document index:{}/iteration :{}".format(worker_id, doc_idx, iter))
 
-        base_output_path = os.path.join(pdf_output_path, f"{iter}-{idx}")
+        base_output_path = os.path.join(config.output_folder, "worker_{}".format(worker_id),  f"iter_{iter}")
         os.makedirs(base_output_path, exist_ok=True)
 
-        file_name = os.path.join(base_output_path, "{}".format(str(idx))) 
-        deg_file_name = os.path.join(base_output_path, "{}".format(str(idx)))
+        file_name = os.path.join(base_output_path, "{}".format(str(doc_idx))) 
+        deg_file_name = os.path.join(base_output_path, "{}".format(str(doc_idx)))
 
         pdf_name = file_name + ".pdf"
         # Store Pdf with convert_from_path function.
@@ -209,28 +215,27 @@ while True:
         bbox = doc.render_pdf(target=pdf_name, zoom=config.zoom)
         cleaned_bboxes = clean_bboxes_output(bbox, list())
 
-
-        # doc.render_png(target=png_name, resolution=300)
-        html_output = doc.render_html()
-        output_file_name = os.path.join(config.output_folder, str(worker_id)) 
-        output_file_name = output_file_name + "{}.txt".format(iter) 
-
-        with open(output_file_name, 'w') as file:
-            for entries in cleaned_bboxes:
-                line = ""
-                for entry in entries:
-                    line += str(entry)
-                    line += "," 
-                line = line[:-1]
-                line += "\n"
-                file.write(line)    
+        if config.dump_bboxes:
+            output_file_name = os.path.join(base_output_path,"{}.txt".format(doc_idx)) 
             
+            print("BBoxes file", output_file_name)
+            with open(output_file_name, 'w') as file:
+                for entries in cleaned_bboxes:
+                    line = ""
+                    for entry in entries:
+                        line += str(entry)
+                        line += "," 
+                    line = line[:-1]
+                    line += "\n"
+                    file.write(line)            
         
-        with open(os.path.join(base_output_path, 'string.html'), 'w') as file :
-            file.writelines(html_output)
+        if config.dump_html: 
+            # doc.render_png(target=png_name, resolution=300)
+            html_output = doc.render_html()
+            with open(os.path.join(base_output_path, 'string.html'), 'w') as file :
+                file.writelines(html_output)
 
         print("Bboxes len: ", len(cleaned_bboxes))
-
 
         images = convert_from_path(pdf_name, dpi=config.dpi)
         for i in range(len(images)):
@@ -250,15 +255,30 @@ while True:
             deg_image = deg_image.reshape((*deg_image.shape,1)) 
             deg_image = np.concatenate((deg_image, deg_image, deg_image), axis=2)
             
+            bbox_pts = bbox2pts(cleaned_bboxes, scale=config.pdf2image_scale_factor)
             # Random Warping
-            bbox_pts = bbox2pts(cleaned_bboxes)
             if config.warp.enabled: 
-                deg_image, bboxes = gridWarper(deg_image, bbox_pts)
-            
+                deg_image, bbox_pts = gridWarper(deg_image, bbox_pts)
+
+            if config.dump_points: 
+                lines = list()
+                with open(os.path.join(base_output_path, "pts_{}.txt".format(doc_idx)), 'w') as pts_file:
+                    line = ""
+                    for pt in bbox_pts: 
+                        for coord in pt: 
+                            line += str(coord)
+                            line += ','
+
+                        line = line[:-1]
+                        line += "\n"
+                        lines.append(line)
+                    pts_file.writelines(lines)
+
             deg_image = drawbboxes(deg_image, bbox_pts, color=(207, 227, 226))
             cv.imshow(winname, deg_image)
             #cv.waitKey(3000)        
 
+            print('Bbox Visualied Degraded image written to:', deg_png_name)
             cv.imwrite(deg_png_name, deg_image)
 
             break

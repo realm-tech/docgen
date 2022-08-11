@@ -44,15 +44,16 @@ def poses2bboxes(poses: List[Any], page_height: float, zoom: float) -> np.ndarra
 
     return wbboxes
 
-def drawbboxes(img: np.ndarray, bboxes: np.ndarray, color=(0,0,0)) -> np.ndarray: 
+def drawbboxes(img: np.ndarray, bboxes: np.ndarray, color=(125,125,125)) -> np.ndarray: 
 
-    line_size = 4
+    line_size = 5
     # Iterating over all word bboxes
     for bbox in bboxes: 
         # Iterating over all points in a single bbox
         for pt_idx, pt in enumerate(bbox): 
-            img = cv.circle(img, tuple(pt), 3, color, line_size, cv.LINE_8)
-            img = cv.line(img, tuple(pt), tuple(bbox[(pt_idx+1)%4]), color, line_size, cv.LINE_8)
+            print(pt)
+            img = cv.circle(img, tuple(pt), 3, color, line_size, cv.LINE_AA)
+            img = cv.line(img, tuple(pt), tuple(bbox[(pt_idx+1)%4]), color, line_size, cv.LINE_AA)
     
     return img
 

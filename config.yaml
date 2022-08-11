@@ -7,6 +7,10 @@ zoom: 1
 dpi: 300
 output_folder: /home/parano/Desktop/docgen/dataset
 force_delete: true
+pdf2image_scale_factor: 3.131944
+dump_html: false
+dump_bboxes: false
+dump_points: true
 warp: 
   enabled: true
 
