@@ -1,21 +1,18 @@
 # general libraries.
 import numpy as np
 import cv2 as cv
-import fitz, enum, os, yaml, shutil
-
 from glob import glob
 from typing import List
+import fitz, enum, os, yaml, shutil
 
 # genalog libraries.
 from genalog.generation.document import DocumentGenerator
 from genalog.generation.content import CompositeContent, ContentType
 from genalog.degradation.degrader import Degrader, ImageState
-# pdf2img library.
 from pdf2image import convert_from_path
 
 from utils.file_util import get_logger, YamlDict2Mem, clear_up, create_folder
 from utils.image import poses2bboxes, drawbboxes
-
 from Warping.warper import GridWarper
 
 with open('./config.yaml', 'r') as file:
@@ -206,20 +203,17 @@ while True:
         base_output_path = os.path.join(config.output_folder, "worker_{}".format(worker_id),  f"iter_{iter}")
         os.makedirs(base_output_path, exist_ok=True)
 
-        file_name = os.path.join(base_output_path, "{}".format(str(doc_idx))) 
-        deg_file_name = os.path.join(base_output_path, "{}".format(str(doc_idx)))
-
-        pdf_name = file_name + ".pdf"
+        pdf_name = os.path.join(base_output_path, "output.pdf")
         # Store Pdf with convert_from_path function.
         
         bbox = doc.render_pdf(target=pdf_name, zoom=config.zoom)
         cleaned_bboxes = clean_bboxes_output(bbox, list())
 
         if config.dump_bboxes:
-            output_file_name = os.path.join(base_output_path,"{}.txt".format(doc_idx)) 
+            output_bboxes_file_name = os.path.join(base_output_path,"{}.txt".format(doc_idx)) 
             
-            print("BBoxes file", output_file_name)
-            with open(output_file_name, 'w') as file:
+            print("BBoxes file", output_bboxes_file_name)
+            with open(output_bboxes_file_name, 'w') as file:
                 for entries in cleaned_bboxes:
                     line = ""
                     for entry in entries:
@@ -239,18 +233,17 @@ while True:
 
         images = convert_from_path(pdf_name, dpi=config.dpi)
         for i in range(len(images)):
-            png_name = file_name + "_" + str(i) + ".png"
-            deg_png_name = deg_file_name + "_" + str(i) + ".png"
+            # png_name = file_name + "_" + str(i) + ".png"
+            # deg_png_name = deg_file_name + "_" + str(i) + ".png"
+            original_png_name = str(i) + ".png"
+            original_png_path = os.path.join(base_output_path, original_png_name)
+            degraded_png_path = os.path.join(base_output_path, config.degraded_images_prefix + original_png_name)
 
-            # Save pages as images in the pdf.
-            print("####"*10)
-            print("png_name", png_name)
+            print("png_name", original_png_name)
             print(type(images[i]))
-            images[i].save(png_name, 'PNG')
+            images[i].save(original_png_path, 'PNG')
 
-            deg_png_name = deg_png_name + "untouched.png"
-            images[i].save(deg_png_name, 'PNG')
-            deg_image = degrader.apply_effects(cv.imread(deg_png_name, cv.IMREAD_GRAYSCALE))
+            deg_image = degrader.apply_effects(cv.imread(original_png_path, cv.IMREAD_GRAYSCALE))
 
             deg_image = deg_image.reshape((*deg_image.shape,1)) 
             deg_image = np.concatenate((deg_image, deg_image, deg_image), axis=2)
@@ -258,33 +251,36 @@ while True:
             bbox_pts = bbox2pts(cleaned_bboxes, scale=config.pdf2image_scale_factor)
             # Random Warping
             if config.warp.enabled: 
+                warped_png_path = os.path.join(base_output_path, config.warped_images_prefix + original_png_name)
                 deg_image, bbox_pts = gridWarper(deg_image, bbox_pts)
+                cv.imwrite(warped_png_path, deg_image)
 
             if config.dump_points: 
                 lines = list()
-                with open(os.path.join(base_output_path, "pts_{}.txt".format(doc_idx)), 'w') as pts_file:
+                bbox_pts_points_path = os.path.join(base_output_path, "pts_{}.txt".format(doc_idx))
+                with open(bbox_pts_points_path ,'w') as pts_file:
                     line = ""
                     for pt in bbox_pts: 
-                        for coord in pt: 
-                            line += str(coord)
-                            line += ','
+                        for coords in pt:
+                            for coord in coords:  
+                                line += str(coord)
+                                line += ','
 
                         line = line[:-1]
                         line += "\n"
                         lines.append(line)
                     pts_file.writelines(lines)
 
-            deg_image = drawbboxes(deg_image, bbox_pts, color=(207, 227, 226))
-            cv.imshow(winname, deg_image)
-            #cv.waitKey(3000)        
-
-            print('Bbox Visualied Degraded image written to:', deg_png_name)
-            cv.imwrite(deg_png_name, deg_image)
+            if config.dump_visulized_bboxes:
+                bboxes_visulized_image = drawbboxes(deg_image, bbox_pts, color=(207, 227, 226))      
+                bboxes_visualized_path = os.path.join(base_output_path, config.bbox_visualized_prefix + original_png_name)
+                cv.imwrite(bboxes_visualized_path, bboxes_visulized_image)
+                print('Bbox Visualied Degraded image written to:', bboxes_visualized_path)
 
             break
 
         break     
-    break
+    
 
-    if iter == 3: 
+    if iter == config.iteration_per_worker: 
         break
