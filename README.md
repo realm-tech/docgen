@@ -1,33 +1,24 @@
-# docgen (OCR)
+# ocrdocgen (OCR)
 
 ## Installation
-The version of WeasyPrint must be 52.5. 
-we plan to completley remove `genalog` which causing some serious problems
 ```bash
 python3 -m pip install -r requirements.txt
-```
-
-## Dependencies
-
-Install modified version of `WeasyPrint` 
-```bash
 python3 -m pip install flit && flit install --symlink --python /usr/bin/python3
+```
+* Install the provided weasyprint port which supports dumping the required bounding boxes 
+``` 
+cd WeasyPrint-55.0 && python3 -m pip install . 
 ```
 
 ## How to use:
-"dataset_generator.py" is the main file. 
+Just run the `main.py` file. 
+```bash
+python3 ./main.py
+```
 
-
-"texts/example.txt" is the input text. 
-"outputs/" is the output folder. 
+"texts/example.txt" is the input text.
 "templates/" is the folder to store templates in jinja2.
 "images/" is the images folder to use in the template.
 "fonts/" is the fonts folder. poupulate some fonts
 run "dataset_generator.py".
-
-
-# Sample visualization
-```bash
-./visualize.py --img  /home/parano/Desktop/docgen/output/1-0/0_0.pnguntouched.png --bbox /home/parano/docgen/test
-```
 
