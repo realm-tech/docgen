@@ -16,3 +16,16 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag parano/ocrdocgen:$(date +%s) --tag parano/ocrdocgen:latest 
+    
+    - name: Images
+      run: docker images
+    
+    - name: Exporting Docker Image
+      run: | 
+        docker images save -o ./ocrdocgen.tar.gz parano/ocrdocgen:latest
+        
+    - name: Uploading Artifact
+      uses: actions/upload-artifact@v3
+      with: 
+        name: docker image
+        path: ./ocrdocgen.tar.gz
