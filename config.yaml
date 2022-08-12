@@ -1,11 +1,10 @@
-num_fonts: 100 # Number of fonts randomly picked from font file
+num_fonts: 100 # Number of fonts randomly picked from font folder
 num_logos: 1 # * logs * 
 num_sigs: 1  # * sigs * 
 num_addressee_name: 1
 num_addressee_title: 1
 zoom: 1
 dpi: 300
-output_folder: /home/parano/Desktop/ocrdocgen/dataset
 force_delete: true
 pdf2image_scale_factor: 3.131944
 dump_html: false
@@ -16,6 +15,15 @@ iteration_per_worker: 10
 degraded_images_prefix: "degraded_"
 warped_images_prefix: "warped_"
 bbox_visualized_prefix: "bboxesvix_"
+
+### File Config
+output_folder: ./dataset
+img_logo_base_path: "./img_logos/"
+img_sig_base_path: "./img_sigs/"
+font_base_path: "./fonts/"
+text_base_path: "./texts/"
+
+headless_mode: True
 warp: 
   enabled: true
 

@@ -7,7 +7,7 @@ python3 -m pip install flit && flit install --symlink --python /usr/bin/python3
 ```
 * Install the provided weasyprint port which supports dumping the required bounding boxes 
 ``` 
-cd WeasyPrint-55.0 && python3 -m pip install . 
+cd WeasyPrint && python3 -m pip install . 
 ```
 
 ## How to use:
@@ -22,3 +22,9 @@ python3 ./main.py
 "fonts/" is the fonts folder. poupulate some fonts
 run "dataset_generator.py".
 
+
+# Dockerimage
+
+```bash
+DOCKER_BUILDKIT=1 docker build . 
+```

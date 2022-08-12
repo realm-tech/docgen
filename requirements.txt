@@ -1,0 +1,7 @@
+numpy
+opencv-python
+python-json-logger
+Pillow
+pyyaml
+cairocffi
+pdf2image

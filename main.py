@@ -3,7 +3,8 @@ import numpy as np
 import cv2 as cv
 from glob import glob
 from typing import List
-import fitz, enum, os, yaml, shutil
+import enum, os, yaml, shutil
+from yaml import Loader
 
 # genalog libraries.
 from genalog.generation.document import DocumentGenerator
@@ -16,7 +17,7 @@ from utils.image import poses2bboxes, drawbboxes
 from Warping.warper import GridWarper
 
 with open('./config.yaml', 'r') as file:
-    config = yaml.load(file)
+    config = yaml.load(file, Loader=Loader)
 config = YamlDict2Mem(**config)
 
 os.environ["DUMP_BOUNDING_BOX"] = "1"
@@ -32,8 +33,6 @@ def random_select(inp: List, count: int, logger=None):
     np.random.shuffle(inp)
     return inp[:count]
 
-#np.random.seed(37)
-
 # Enum class for page sizes.
 class PageSize(enum.Enum):
     A3 = 0
@@ -43,19 +42,20 @@ class PageSize(enum.Enum):
 
 logger = get_logger("genalog_extended", add_file=False)
 
-winname = 'vis'
-cv.namedWindow(winname, cv.WINDOW_NORMAL)
+if not config.headless_mode:
+    winname = 'vis'
+    cv.namedWindow(winname, cv.WINDOW_NORMAL)
 
 # define paths.
 text_path = "./texts/example.txt"
-text_base_path = "./texts"
+text_base_path = config.text_base_path
 pdf_output_path = "./output"
 absolute_path = "file://" + os.path.dirname(os.path.abspath(__file__))
 absolute_path_wo = os.path.dirname(os.path.abspath(__file__))
 logger.info("Absolute path: {}".format(absolute_path))
-img_logo_base_path = "img_logos/"
-img_sig_base_path = "img_sigs/"
-font_base_path = "fonts/"
+img_logo_base_path = config.img_logo_base_path 
+img_sig_base_path = config.img_sig_base_path 
+font_base_path = config.font_base_path
 
 all_fonts = glob(os.path.join(font_base_path, '/*.ttf'))
 

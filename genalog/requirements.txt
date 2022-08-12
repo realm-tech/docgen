@@ -1,0 +1,16 @@
+biopython
+numpy
+python-dotenv
+requests
+azure-core
+azure-common
+azure-storage-blob
+tqdm
+Jinja2
+WeasyPrint
+matplotlib
+scikit-image
+opencv-python
+pandas
+aiofiles
+aiohttp

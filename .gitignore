@@ -3,14 +3,13 @@ __pycache__
 texts/crawler.txt
 genalog_repo
 pyvenv
-wasyprint-*
 logs
 test
 pyvenv*
 sample_output
-fonts
 .vscode
 **/a.out 
 **/*.out
 **/*.png
 dataset
+pips
