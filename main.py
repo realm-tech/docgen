@@ -213,7 +213,7 @@ def generate(worker_id: int=0):
             if config.dump_bboxes:
                 output_bboxes_file_name = os.path.join(base_output_path,"{}.txt".format(doc_idx)) 
                 
-                print("BBoxes file", output_bboxes_file_name)
+                #print("BBoxes file", output_bboxes_file_name)
                 with open(output_bboxes_file_name, 'w') as file:
                     for entries in cleaned_bboxes:
                         line = ""
@@ -230,7 +230,7 @@ def generate(worker_id: int=0):
                 with open(os.path.join(base_output_path, 'string.html'), 'w') as file :
                     file.writelines(html_output)
 
-            print("Bboxes len: ", len(cleaned_bboxes))
+            #print("Bboxes len: ", len(cleaned_bboxes))
 
             images = convert_from_path(pdf_name, dpi=config.dpi)
             for i in range(len(images)):
@@ -238,7 +238,7 @@ def generate(worker_id: int=0):
                 # deg_png_name = deg_file_name + "_" + str(i) + ".png"
                 original_png_name = str(i) + ".png"
                 original_png_path = os.path.join(base_output_path, original_png_name)
-                print(type(images[i]))
+                #print(type(images[i]))
                 images[i].save(original_png_path, 'PNG')
 
                 deg_image = degrader.apply_effects(cv.imread(original_png_path, cv.IMREAD_GRAYSCALE))
@@ -247,6 +247,8 @@ def generate(worker_id: int=0):
                 deg_image = np.concatenate((deg_image, deg_image, deg_image), axis=2)
                 
                 bbox_pts = bbox2pts(cleaned_bboxes, scale=config.pdf2image_scale_factor)
+                
+                warped_png_path = None
                 # Random Warping
                 if config.warp.enabled: 
                     warped_png_path = os.path.join(base_output_path, config.warped_images_prefix + original_png_name)
@@ -255,7 +257,12 @@ def generate(worker_id: int=0):
 
                 if config.dump_points: 
                     lines = list()
-                    bbox_pts_points_path = os.path.join(base_output_path, "pts_{}.txt".format(doc_idx))
+                    
+                    if warped_png_path: 
+                        bbox_pts_points_path = warped_png_path + '.txt'
+                    else:                         
+                        bbox_pts_points_path = os.path.join(base_output_path, "pts_{}.txt".format(doc_idx))
+
                     with open(bbox_pts_points_path ,'w') as pts_file:
                         line = ""
                         for pt in bbox_pts: 
@@ -273,7 +280,7 @@ def generate(worker_id: int=0):
                     bboxes_visulized_image = drawbboxes(deg_image, bbox_pts, color=(207, 227, 226))      
                     bboxes_visualized_path = os.path.join(base_output_path, config.bbox_visualized_prefix + original_png_name)
                     cv.imwrite(bboxes_visualized_path, bboxes_visulized_image)
-                    print('Bbox Visualied Degraded image written to:', bboxes_visualized_path)
+                    #print('Bbox Visualied Degraded image written to:', bboxes_visualized_path)
 
                 break
 
