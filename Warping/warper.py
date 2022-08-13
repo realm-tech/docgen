@@ -25,7 +25,8 @@ class GridWarper():
 
         assert(random_area_ratio < 0.5 and random_area_ratio > 0.0)
         self.random_area_ratio = random_area_ratio
-        self.visualize_conversion_points = True
+
+        self.visualize_conversion_points = False
 
     def path(self):
         pass

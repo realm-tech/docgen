@@ -11,7 +11,6 @@ dump_html: false
 dump_bboxes: false
 dump_points: true
 dump_visulized_bboxes: true
-iteration_per_worker: 10
 degraded_images_prefix: "degraded_"
 warped_images_prefix: "warped_"
 bbox_visualized_prefix: "bboxesvix_"
@@ -22,6 +21,10 @@ img_logo_base_path: "./img_logos/"
 img_sig_base_path: "./img_sigs/"
 font_base_path: "./fonts/"
 text_base_path: "./texts/"
+
+# Workers
+iteration_per_worker: 50
+worker_count: 4
 
 headless_mode: True
 warp: 
