@@ -32,11 +32,3 @@ jobs:
         sudo apt-get install rclone
         echo "$mega_conf" > ~/.config/rclone/rclone.conf
         rclone copy --progress ./ocrdocgen.tar.gz mega:/images/ 
-       
-        
-#     - name: Uploading Artifact
-#       uses: actions/upload-artifact@v3
-#       with: 
-#         name: docker image
-#         path: ./ocrdocgen.tar.gz
-
