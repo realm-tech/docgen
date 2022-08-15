@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "prod" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -29,3 +29,6 @@ jobs:
       with: 
         name: docker image
         path: ./ocrdocgen.tar.gz
+
+    - name: Push to Gitlab Container Registry
+    
