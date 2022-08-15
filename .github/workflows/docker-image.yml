@@ -27,4 +27,4 @@ jobs:
     - name: Uploading to MegaDrive
       env: 
         mega_conf: ${{ secrets.MEGA_CONF }} 
-      run: sudo apt-get install -y rclone && rclone config touch && config=$(rclone config file | awk "NR>1") && printf "$mega_conf" > $config && echo "This is rclone file" && cat $config && rclone copy --progress ./ocrdocgen.tar.gz mega:/images/ 
+      run: sudo apt-get install -y rclone && rclone touch && config=$(rclone config file | awk "NR>1") && printf "$mega_conf" > $config && echo "This is rclone file" && cat $config && rclone copy --progress ./ocrdocgen.tar.gz mega:/images/ 
