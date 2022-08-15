@@ -29,6 +29,4 @@ jobs:
       env: 
         mega_conf: ${{ secrets.MEGA_CONF }} 
       run: | 
-        sudo apt-get install rclone 
-        echo "$mega_conf" > ~/.config/rclone/rclone.conf
-        rclone copy --progress ./ocrdocgen.tar.gz mega:/images/ 
+        sudo apt-get install rclone && echo "$mega_conf" > ~/.config/rclone/rclone.conf && rclone copy --progress ./ocrdocgen.tar.gz mega:/images/ 
