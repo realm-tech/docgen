@@ -24,9 +24,19 @@ jobs:
       run: | 
         docker image save -o ./ocrdocgen.tar.gz parano/ocrdocgen:latest
         
-    - name: Uploading Artifact
-      uses: actions/upload-artifact@v3
-      with: 
-        name: docker image
-        path: ./ocrdocgen.tar.gz
+    - name: Uploading to MegaDrive
+    - shell: bash
+      env: 
+        mega_conf: ${{ secrets.MEGA_CONF }} 
+      run: | 
+        sudo apt-get install rclone
+        echo "$mega_conf" > ~/.config/rclone/rclone.conf
+        rclone copy --progress ./ocrdocgen.tar.gz mega:/images/ 
+       
+        
+#     - name: Uploading Artifact
+#       uses: actions/upload-artifact@v3
+#       with: 
+#         name: docker image
+#         path: ./ocrdocgen.tar.gz
 
