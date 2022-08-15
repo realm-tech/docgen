@@ -30,5 +30,3 @@ jobs:
         name: docker image
         path: ./ocrdocgen.tar.gz
 
-    - name: Push to Gitlab Container Registry
-    
