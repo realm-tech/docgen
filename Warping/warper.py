@@ -50,14 +50,19 @@ class GridWarper():
         else: 
             raise NotImplementedError
 
-    def __call__(self, img: np.ndarray, pts: np.ndarray) -> np.ndarray:
+    def __call__(self, img: np.ndarray, pts: np.ndarray, background_img=None) -> np.ndarray:
         if self.same_shape:
             self.output_dim = img.shape  
             print("Image output dimension is set to", self.output_dim)  
 
-        # TODO: Replace with some background mabybe ? 
-        output = np.zeros(self.output_dim, dtype=np.uint8)
-        
+        # TODO: Fix scale 
+        if background_img is not None: 
+            print(type(background_img), background_img.shape)
+            output = cv.resize(background_img, self.output_dim)
+            #output = np.reshape(background_img, self.output_dim)
+        else:
+            output = np.zeros(self.output_dim, dtype=np.uint8)
+
         ul = self._get_random_point_in_range(*self._get_random_area('ul'))
         ur = self._get_random_point_in_range(*self._get_random_area('ur'))
         ll = self._get_random_point_in_range(*self._get_random_area('ll'))

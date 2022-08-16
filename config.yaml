@@ -19,6 +19,7 @@ bbox_visualized_prefix: "bboxesvix_"
 output_folder: ./dataset
 img_logo_base_path: "./img_logos/"
 img_sig_base_path: "./img_sigs/"
+img_background_path: "./img_backs/"
 font_base_path: "./fonts/"
 text_base_path: "./texts/"
 

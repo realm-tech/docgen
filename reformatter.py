@@ -8,8 +8,17 @@ parser = ArgumentParser()
 
 parser.add_argument('--input_path', default='./dataset')
 parser.add_argument('--output_path', default='./reformatted_dataset')
+parser.add_argument('--method', default='move') 
 
 args = parser.parse_args()
+
+trans_method = None
+if args.method  == "move": 
+    trans_method = shutil.move
+elif args.method == "copy": 
+    trans_method = shutil.copy
+else: 
+    raise NotImplementedError
 
 os.makedirs(args.output_path, exist_ok=True)
 
@@ -38,8 +47,8 @@ for img in tqdm(glob(imgs_glob, recursive=True), desc="Iterating over images and
 
     dst_img = os.path.join(output_imgs_path, img_name)
     dst_text = os.path.join(output_text_path, txt_name)
-    shutil.copy(img, dst_img)
-    shutil.copy(orig_text_path, dst_text)
+    trans_method(img, dst_img)
+    trans_method(orig_text_path, dst_text)
 
 
 train_list_file.close()

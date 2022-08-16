@@ -49,23 +49,32 @@ if not config.headless_mode:
     cv.namedWindow(winname, cv.WINDOW_NORMAL)
 
 # define paths.
-text_path = "./texts/example.txt"
 text_base_path = config.text_base_path
-pdf_output_path = "./output"
 absolute_path = "file://" + os.path.dirname(os.path.abspath(__file__))
 absolute_path_wo = os.path.dirname(os.path.abspath(__file__))
 logger.info("Absolute path: {}".format(absolute_path))
 img_logo_base_path = config.img_logo_base_path 
 img_sig_base_path = config.img_sig_base_path 
+img_backs_path = config.img_background_path
 font_base_path = config.font_base_path
+
 
 all_fonts = glob(os.path.join(font_base_path, '/*.ttf'))
 
 BASE_OUTPUT_PATH= "output"
 os.makedirs(BASE_OUTPUT_PATH, exist_ok=True)
 
-with open(os.path.join(text_base_path, 'crawler.txt'), 'r') as file:
-    text_dataset = file.readlines()
+text_dataset = list()
+for text_file in glob(os.path.join(text_base_path, '*.txt')): 
+    logger.info("Appending {} to the text data".format(text_file))
+    with open(text_file, 'r') as file:
+        text_dataset.extend(file.readlines())
+logger.info("There is {} lines of text presented in the current dataset".format(len(text_dataset)))
+
+back_images = list()
+back_image_paths = glob(os.path.join(img_backs_path, './*.jpeg'))
+for back_image_path in back_image_paths:
+    back_images.append(cv.imread(back_image_path))
 
 letter_addressee_name = [i for i in text_dataset if len(i)<30]
 letter_addressee_name = random_select(letter_addressee_name, config.num_addressee_name)
@@ -252,7 +261,10 @@ def generate(worker_id: int=0):
                 # Random Warping
                 if config.warp.enabled: 
                     warped_png_path = os.path.join(base_output_path, config.warped_images_prefix + original_png_name)
-                    deg_image, bbox_pts = gridWarper(deg_image, bbox_pts)
+
+                    back_image = back_images[np.random.randint(0, len(back_images))] 
+                    deg_image, bbox_pts = gridWarper(deg_image, bbox_pts, back_image)
+                    
                     cv.imwrite(warped_png_path, deg_image)
 
                 if config.dump_points: 
