@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "prod" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -14,6 +14,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Setting Up Rclone
+      env: 
+        mega_conf: ${{ secrets.MEGA_CONF }} 
+      run: wget https://github.com/rclone/rclone/releases/download/v1.59.1/rclone-v1.59.1-linux-amd64.deb && sudo dpkg -i ./rclone-v1.59.1-linux-amd64.deb && rclone config touch && config=$(rclone config file | awk "NR>1") && printf "$mega_conf" > $config && echo "This is rclone file" && cat $config
+    
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag parano/ocrdocgen:$(date +%s) --tag parano/ocrdocgen:latest 
 
@@ -24,8 +29,5 @@ jobs:
       run: | 
         docker image save -o ./ocrdocgen.tar.gz parano/ocrdocgen:latest
         
-    - name: Uploading Artifact
-      uses: actions/upload-artifact@v3
-      with: 
-        name: docker image
-        path: ./ocrdocgen.tar.gz
+    - name: Uploading to MegaDrive
+      run:  rclone copy --progress ./ocrdocgen.tar.gz mega:/images/ 
