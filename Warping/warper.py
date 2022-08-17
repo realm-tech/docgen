@@ -25,6 +25,7 @@ class GridWarper():
 
         assert(random_area_ratio < 0.5 and random_area_ratio > 0.0)
         self.random_area_ratio = random_area_ratio
+        self.random_output_dim = True
 
         self.visualize_conversion_points = False
 
@@ -55,13 +56,8 @@ class GridWarper():
             self.output_dim = img.shape  
             print("Image output dimension is set to", self.output_dim)  
 
-        # TODO: Fix scale 
-        if background_img is not None: 
-            print(type(background_img), background_img.shape)
-            output = cv.resize(background_img, self.output_dim)
-            #output = np.reshape(background_img, self.output_dim)
-        else:
-            output = np.zeros(self.output_dim, dtype=np.uint8)
+        if self.random_output_dim:
+            self.output_dim = (int(np.random.randint(800,1400)), int(np.random.randint(600, 1200)), 3)
 
         ul = self._get_random_point_in_range(*self._get_random_area('ul'))
         ur = self._get_random_point_in_range(*self._get_random_area('ur'))
@@ -103,8 +99,25 @@ class GridWarper():
 
         persTrans = cv.getPerspectiveTransform(srcPoints, dstPoints)
         
-        output = cv.warpPerspective(img, persTrans, dsize=self.output_dim)
+        output = cv.warpPerspective(img, persTrans, dsize=self.output_dim)   
+
+        # TODO: Fix scale 
+        if background_img is not None: 
+            background = cv.resize(background_img, self.output_dim[:2])
+            mask = np.zeros(output.shape, dtype=np.uint8)
+
+            dst_pts = dstPoints.astype(np.int32)
+            dst_pts = dst_pts[:,::-1]
+            dst_pts = np.array([dst_pts])
+            mask = cv.drawContours(mask, dst_pts, 0, (0,255,0), cv.FILLED)
+            paper = cv.bitwise_and(output, output, mask=mask)
+
+            mask_inv = cv.bitwise_not(mask)
+            background = cv.bitwise_and(background, background, mask=mask_inv)
+
+            output = cv.add(paper, background)
         
+        # Translating bounding boxes to new warped image
         num_bbox = pts.shape[0]
         pts_per_bbox = pts.shape[1]
         pts = pts.reshape((num_bbox*pts_per_bbox, pts.shape[2]))
