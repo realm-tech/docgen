@@ -64,7 +64,7 @@ class GridWarper():
         ll = self._get_random_point_in_range(*self._get_random_area('ll'))
         lr = self._get_random_point_in_range(*self._get_random_area('lr'))
 
-        ow = img.shape[1]
+        ow = img.shape[1]   
         oh = img.shape[0]
         oul = (0,0)
         our = (ow,0)
@@ -75,13 +75,13 @@ class GridWarper():
         dstPoints = np.zeros((4,2), dtype=np.float32)
         srcPoints[0] = oul
         srcPoints[1] = our
-        srcPoints[2] = oll
-        srcPoints[3] = olr
+        srcPoints[2] = olr
+        srcPoints[3] = oll
 
         dstPoints[0] = ul
         dstPoints[1] = ur
-        dstPoints[2] = ll
-        dstPoints[3] = lr
+        dstPoints[2] = lr
+        dstPoints[3] = ll
 
         print("Src points")
         print(srcPoints)
@@ -107,13 +107,15 @@ class GridWarper():
             mask = np.zeros(output.shape, dtype=np.uint8)
 
             dst_pts = dstPoints.astype(np.int32)
-            dst_pts = dst_pts[:,::-1]
-            dst_pts = np.array([dst_pts])
-            mask = cv.drawContours(mask, dst_pts, 0, (0,255,0), cv.FILLED)
-            paper = cv.bitwise_and(output, output, mask=mask)
+            #dst_pts = dst_pts[:,::-1]
+            #dst_pts = dst_pts[:,:]
+            dst_pts = np.array([dst_pts[:], dst_pts[0]])
+            mask = cv.drawContours(mask, dst_pts, 0, (255,255,255), cv.FILLED)
 
             mask_inv = cv.bitwise_not(mask)
-            background = cv.bitwise_and(background, background, mask=mask_inv)
+            print(mask_inv[:,:,0].shape, type(mask_inv))
+            background = cv.bitwise_and(background, background, mask=mask_inv[:,:,0])
+            paper = cv.bitwise_and(output, output, mask=mask[:,:,0])
 
             output = cv.add(paper, background)
         

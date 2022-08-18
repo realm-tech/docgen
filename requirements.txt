@@ -5,3 +5,4 @@ Pillow
 pyyaml
 cairocffi
 pdf2image
+flit
