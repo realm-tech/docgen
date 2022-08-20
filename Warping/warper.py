@@ -110,7 +110,7 @@ class GridWarper():
             #dst_pts = dst_pts[:,::-1]
             #dst_pts = dst_pts[:,:]
             dst_pts = np.array([dst_pts[:], dst_pts[0]])
-            mask = cv.drawContours(mask, dst_pts, 0, (255,255,255), cv.FILLED)
+            mask = cv.drawContours(mask, dst_pts, 0, (255,255,255), cv.FILLED, lineType=cv.LINE_AA)
 
             mask_inv = cv.bitwise_not(mask)
             print(mask_inv[:,:,0].shape, type(mask_inv))
