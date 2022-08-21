@@ -15,3 +15,5 @@ dataset
 pips
 reformatted_dataset
 WeasyPrint-*/
+
+!docs/*.png

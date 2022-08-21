@@ -1,5 +1,12 @@
 # ocrdocgen (OCR)
 
+# Overview
+
+## Sample of synthetic document
+![Generated Image](./docs/sample1.png)
+
+## Sample of synthetic document with bounding boxes visualization
+![Generated Image with BBoxes](./docs/sample1_bboxes.png)
 ## Installation
 ```bash
 python3 -m pip install -r requirements.txt
