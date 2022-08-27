@@ -1,7 +1,9 @@
 # general libraries.
+from typing_extensions import Self
 import numpy as np
 import cv2 as cv
 from glob import glob
+import json 
 from typing import List
 import enum, os, yaml, shutil
 from yaml import Loader
@@ -200,7 +202,8 @@ def generate(worker_id: int=0):
     iter = 0
     while True: 
         logger.info("iter no: {}".format(iter+1))
-        iter+=1 
+        iter+=1
+        flag_multi = False
 
         default_generator = DocumentGenerator(template_path="./templates")
         doc_gen = default_generator.create_generator(content, ['letter.html.jinja'])
@@ -218,6 +221,13 @@ def generate(worker_id: int=0):
             
             bbox = doc.render_pdf(target=pdf_name, zoom=config.zoom)
             cleaned_bboxes = clean_bboxes_output(bbox, list())
+
+            images = convert_from_path(pdf_name, dpi=config.dpi)
+            if len(images) > 1: 
+                logger.info("Multipage document not supported yet .. ")
+                flag_multi = True
+                break
+                
 
             if config.dump_bboxes:
                 output_bboxes_file_name = os.path.join(base_output_path,"{}.txt".format(doc_idx)) 
@@ -241,7 +251,6 @@ def generate(worker_id: int=0):
 
             #print("Bboxes len: ", len(cleaned_bboxes))
 
-            images = convert_from_path(pdf_name, dpi=config.dpi)
             for i in range(len(images)):
                 # png_name = file_name + "_" + str(i) + ".png"
                 # deg_png_name = deg_file_name + "_" + str(i) + ".png"
@@ -272,12 +281,21 @@ def generate(worker_id: int=0):
                     
                     if warped_png_path: 
                         bbox_pts_points_path = warped_png_path + '.txt'
+                        bbox_pts_points_obj = warped_png_path + '.json'
                     else:                         
                         bbox_pts_points_path = os.path.join(base_output_path, "pts_{}.txt".format(doc_idx))
+                        bbox_pts_points_obj = os.path.join(base_output_path, "pts_{}.json".format(doc_idx))
+
+                    point_desc = dict()
+                    point_desc["points"] = bbox_pts.tolist()
+                    with open(bbox_pts_points_obj, 'w') as pts_obj_file: 
+                        json.dump(point_desc, pts_obj_file)
 
                     with open(bbox_pts_points_path ,'w') as pts_file:
+                        logger.info("Length of bboxes is {}".format(len(bbox_pts)))
                         line = ""
                         for pt in bbox_pts: 
+                            line = ""
                             for coords in pt:
                                 for coord in coords:  
                                     line += str(coord)
@@ -298,6 +316,8 @@ def generate(worker_id: int=0):
 
             break     
         
+        if flag_multi: 
+            iter -= 1
 
         if iter == config.iteration_per_worker: 
             break
