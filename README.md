@@ -1,6 +1,7 @@
 # ocrdocgen (OCR)
 
 # Overview
+A simple tool for generating synthetic dataset for training of both **detection** and **recognition** part of an OCR pipeline.
 
 ## Sample of synthetic document
 ![Generated Image](./docs/sample1.png)
@@ -35,3 +36,7 @@ run "dataset_generator.py".
 ```bash
 DOCKER_BUILDKIT=1 docker build . 
 ```
+
+
+# Updates
+[2023/08/19 Make the code publicly available]
