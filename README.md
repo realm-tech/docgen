@@ -39,4 +39,4 @@ DOCKER_BUILDKIT=1 docker build .
 
 
 # Updates
-[2023/08/19 Make the code publicly available]
+* [2023/08/19] Make the code publicly available.
